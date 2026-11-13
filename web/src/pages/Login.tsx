@@ -57,7 +57,13 @@ export default function Login() {
               ))}
             </div>
           </div>
-          <p className="text-xs text-brand-200/50">© {new Date().getFullYear()} · Censo de Consejos Campesinos</p>
+          <p className="text-xs text-brand-200/50">
+            © 2026 · Censo de Consejos Campesinos por Fundacite La Guaira ·
+            Gimnasio Vertical de La Guaira, Piso 1
+            <br />
+            Aplicación desarrollada por Carmelo Marcano · Programador y
+            desarrollador de software
+          </p>
         </div>
       </div>
 

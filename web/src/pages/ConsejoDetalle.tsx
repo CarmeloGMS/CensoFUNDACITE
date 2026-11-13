@@ -1,8 +1,8 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
-  ArrowLeft, CalendarDays, Check, Crosshair, Droplets, FileText, Home, ImageOff, LandPlot, MapPin, Mountain,
+  ArrowLeft, Bug, CalendarDays, Fish, Pencil, ShoppingBasket, Check, Crosshair, Droplets, FileText, Home, ImageOff, LandPlot, MapPin, Mountain,
   Phone, Smartphone, Sprout, Star, User, Users, Wheat, X,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -11,9 +11,9 @@ import { ConsejosMap } from '../components/ConsejosMap'
 import { Avatar, Button, Card, CardHeader, Chip, Empty, EstadoBadge, Spinner } from '../components/ui'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { useCatalogos, useConsejo } from '../lib/queries'
+import { useCatalogos, useConsejo, usePuedeEditar } from '../lib/queries'
 import { fmtFecha, fmtNum } from '../lib/format'
-import type { Consejo, Estado } from '../lib/types'
+import type { CampoMultiple, Consejo, Estado } from '../lib/types'
 
 function Dato({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: ReactNode }) {
   return (
@@ -33,6 +33,8 @@ export default function ConsejoDetalle() {
   const { data: c, isLoading } = useConsejo(id)
   const { data: cat } = useCatalogos()
   const qc = useQueryClient()
+  const navigate = useNavigate()
+  const puedeEditar = usePuedeEditar()
 
   const cambiarEstado = useMutation({
     mutationFn: (estado: Estado) => api<Consejo>(`/api/consejos/${id}/estado/`, { method: 'POST', body: JSON.stringify({ estado }) }),
@@ -71,15 +73,20 @@ export default function ConsejoDetalle() {
               </p>
             </div>
           </div>
-          {puedeValidar && (
+          {(puedeValidar || puedeEditar(c)) && (
             <div className="flex gap-2">
-              {c.estado !== 'rechazado' && (
+              {puedeEditar(c) && (
+                <Button variant="secondary" icon={Pencil} className="bg-white/10 text-white ring-white/20 hover:bg-white/20" onClick={() => navigate(`/consejos/${c.id}/editar`)}>
+                  Editar
+                </Button>
+              )}
+              {puedeValidar && c.estado !== 'rechazado' && (
                 <Button variant="secondary" icon={X} className="bg-white/10 text-white ring-white/20 hover:bg-white/20"
                   loading={cambiarEstado.isPending && cambiarEstado.variables === 'rechazado'} onClick={() => cambiarEstado.mutate('rechazado')}>
                   Rechazar
                 </Button>
               )}
-              {c.estado !== 'validado' && (
+              {puedeValidar && c.estado !== 'validado' && (
                 <Button variant="success" icon={Check} className="bg-emerald-500 hover:bg-emerald-400"
                   loading={cambiarEstado.isPending && cambiarEstado.variables === 'validado'} onClick={() => cambiarEstado.mutate('validado')}>
                   Validar registro
@@ -118,6 +125,31 @@ export default function ConsejoDetalle() {
                 <Dato icon={CalendarDays} label="Fecha de constitución">{fmtFecha(c.fecha_constitucion)}</Dato>
                 <Dato icon={Users} label="Composición">{`${c.num_hombres} hombres · ${c.num_mujeres} mujeres`}</Dato>
                 <Dato icon={MapPin} label="Dirección">{c.direccion}</Dato>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <CardHeader title="Sanidad, destino y producción animal" icon={Bug} />
+            <div className="grid gap-5 px-5 pb-5 sm:grid-cols-2">
+              {([
+                ['tipos_cultivo', 'Tipo de cultivo', Wheat, 'bg-brand-50 text-brand-800'],
+                ['enfermedades', 'Enfermedades en la cosecha', Bug, 'bg-rose-50 text-rose-800'],
+                ['plagas', 'Plagas', Bug, 'bg-rose-50 text-rose-800'],
+                ['destino_produccion', 'Destino de la producción', ShoppingBasket, 'bg-sky-50 text-sky-800'],
+                ['produccion_animal', 'Producción animal', Fish, 'bg-amber-50 text-amber-800'],
+              ] as [CampoMultiple, string, LucideIcon, string][]).map(([k, titulo, Icon, tono]) => (
+                <div key={k}>
+                  <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-stone-500"><Icon className="size-3.5" />{titulo}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {c[k]?.length ? c[k].map((v) => <Chip key={v} className={`px-2.5 py-1 ${tono}`}>{label(cat?.[k], v)}</Chip>)
+                      : <span className="text-sm text-stone-400">Ninguno</span>}
+                  </div>
+                </div>
+              ))}
+              <div className="sm:col-span-2">
+                <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-stone-500"><FileText className="size-3.5" />Requerimientos - otros</p>
+                <p className="text-sm leading-relaxed whitespace-pre-line text-stone-700">{c.requerimientos || 'Sin requerimientos registrados.'}</p>
               </div>
             </div>
           </Card>

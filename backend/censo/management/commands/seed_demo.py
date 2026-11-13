@@ -7,7 +7,7 @@ from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from censo.models import ConsejoCampesino, Parroquia, Rubro, Vocero
+from censo.models import OPCIONES_MULTIPLES, ConsejoCampesino, Parroquia, Rubro, Vocero
 
 User = get_user_model()
 
@@ -96,6 +96,11 @@ VOCEROS = [
 TELEFONOS = ("0414", "0424", "0412")
 
 
+def _muestra(rng, opciones, minimo=0):
+    valores = [value for value, _ in opciones.choices]
+    return rng.sample(valores, rng.randint(minimo, min(3, len(valores))))
+
+
 class Command(BaseCommand):
     help = "Crea usuarios y aproximadamente 45 registros de demostración."
 
@@ -162,6 +167,11 @@ class Command(BaseCommand):
                 tenencia_tierra=rng.choice([choice[0] for choice in ConsejoCampesino.TenenciaTierra.choices]),
                 fuente_agua=rng.choice([choice[0] for choice in ConsejoCampesino.FuenteAgua.choices]),
                 tiene_riego=rng.choice([True, False]),
+                **{
+                    campo: _muestra(rng, opciones, minimo=1 if campo in {"destino_produccion", "tipos_cultivo"} else 0)
+                    for campo, opciones in OPCIONES_MULTIPLES.items()
+                },
+                requerimientos=rng.choice(["", "Insumos para control biológico de plagas.", "Capacitación en manejo poscosecha.", "Transporte para llevar la cosecha al mercado."]),
                 necesidades=rng.choice(
                     [
                         "Mejorar el acceso al agua para riego.",

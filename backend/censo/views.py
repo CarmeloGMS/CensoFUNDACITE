@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ConsejoCampesino, Foto, Parroquia, Rubro
+from .models import OPCIONES_MULTIPLES, ConsejoCampesino, Foto, Parroquia, Rubro
 from .permissions import IsAdministrator, IsConsejoReader, user_role
 from .serializers import ConsejoSerializer, FotoSerializer, UsuarioSerializer
 
@@ -25,6 +25,22 @@ User = get_user_model()
 
 class ConsejoFilter(filters.FilterSet):
     rubro = filters.NumberFilter(field_name="rubros__id")
+    enfermedad = filters.CharFilter(method="filtrar_contiene")
+    plaga = filters.CharFilter(method="filtrar_contiene")
+    destino = filters.CharFilter(method="filtrar_contiene")
+    cultivo = filters.CharFilter(method="filtrar_contiene")
+    animal = filters.CharFilter(method="filtrar_contiene")
+
+    CAMPOS_CONTIENE = {
+        "enfermedad": "enfermedades",
+        "plaga": "plagas",
+        "destino": "destino_produccion",
+        "cultivo": "tipos_cultivo",
+        "animal": "produccion_animal",
+    }
+
+    def filtrar_contiene(self, queryset, name, value):
+        return queryset.filter(**{f"{self.CAMPOS_CONTIENE[name]}__contains": [value]})
     fecha_desde = filters.DateFilter(field_name="fecha_captura", lookup_expr="date__gte")
     fecha_hasta = filters.DateFilter(field_name="fecha_captura", lookup_expr="date__lte")
 
@@ -77,6 +93,10 @@ class CatalogosView(APIView):
                     {"value": value, "label": label}
                     for value, label in ConsejoCampesino.FuenteAgua.choices
                 ],
+                **{
+                    campo: [{"value": value, "label": label} for value, label in opciones.choices]
+                    for campo, opciones in OPCIONES_MULTIPLES.items()
+                },
                 "estados": [
                     {"value": value, "label": label} for value, label in ConsejoCampesino.Estado.choices
                 ],
@@ -135,6 +155,8 @@ class ConsejoViewSet(viewsets.ModelViewSet):
         writer = csv.writer(response)
         writer.writerow(
             ["id", "uuid", "nombre", "parroquia", "sector", "lat", "lng", "estado", "num_familias"]
+            + list(OPCIONES_MULTIPLES)
+            + ["requerimientos"]
         )
         for consejo in self.filter_queryset(self.get_queryset()):
             writer.writerow(
@@ -149,6 +171,8 @@ class ConsejoViewSet(viewsets.ModelViewSet):
                     consejo.estado,
                     consejo.num_familias,
                 ]
+                + ["; ".join(getattr(consejo, campo)) for campo in OPCIONES_MULTIPLES]
+                + [consejo.requerimientos]
             )
         return response
 
@@ -327,6 +351,17 @@ class EstadisticasView(APIView):
                 "por_mes": [
                     {"mes": row["mes"].strftime("%Y-%m"), "total": row["total"]} for row in por_mes
                 ],
+                "sanidad_produccion": {
+                    campo: [
+                        {
+                            "value": value,
+                            "label": label,
+                            "total": queryset.filter(**{f"{campo}__contains": [value]}).count(),
+                        }
+                        for value, label in opciones.choices
+                    ]
+                    for campo, opciones in OPCIONES_MULTIPLES.items()
+                },
                 "por_encuestador": [
                     {"usuario": row["registrado_por__username"], "total": row["total"]}
                     for row in por_encuestador

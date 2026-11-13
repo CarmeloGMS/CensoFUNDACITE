@@ -21,6 +21,7 @@ const _stepTitles = [
   'Ubicación GPS',
   'Población',
   'Producción',
+  'Sanidad y destino',
   'Voceros',
   'Fotos y notas',
   'Resumen',
@@ -394,6 +395,7 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
                 _locationStep(),
                 _populationStep(),
                 _productionStep(),
+                _healthStep(),
                 _speakersStep(),
                 _photosStep(),
                 _summaryStep(),
@@ -682,6 +684,7 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
           ),
         ),
         const SizedBox(height: 7),
+        _multiChips('tipos_cultivo', 'Tipo de cultivo'),
         const Text('Rubros que producen',
             style: TextStyle(color: darkGreen, fontWeight: FontWeight.w700)),
         const SizedBox(height: 5),
@@ -705,6 +708,59 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
       ],
     );
   }
+
+  List<Map<String, dynamic>> _multiOptions(String field) {
+    final cached = _catalogos[field];
+    return cached == null || cached.isEmpty
+        ? defaultMultiOptions[field] ?? const []
+        : cached;
+  }
+
+  Widget _multiChips(String field, String title) {
+    final selected =
+        (_draft[field] as List? ?? const []).map((v) => v.toString()).toSet();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style: const TextStyle(
+                  color: darkGreen, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 5),
+          Wrap(
+            spacing: 7,
+            runSpacing: 1,
+            children: _multiOptions(field).map((option) {
+              final value = option['value'].toString();
+              return FilterChip(
+                label: Text(option['label'].toString()),
+                selected: selected.contains(value),
+                onSelected: (on) {
+                  final values = Set<String>.from(selected);
+                  on ? values.add(value) : values.remove(value);
+                  _change(field, values.toList());
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _healthStep() => _StepBody(
+        children: [
+          const _StepIntro(
+              title: 'Sanidad, destino y animales',
+              subtitle:
+                  'Marque las enfermedades y plagas presentes, a dónde va la producción y la cría de animales.'),
+          _multiChips('enfermedades', 'Enfermedades en la cosecha'),
+          _multiChips('plagas', 'Plagas'),
+          _multiChips('destino_produccion', 'Destino de la producción'),
+          _multiChips('produccion_animal', 'Producción animal'),
+        ],
+      );
 
   Widget _speakersStep() {
     final speakers = (_draft['voceros'] as List? ?? const [])
@@ -836,11 +892,23 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
                   child: Text('Todavía no hay fotografías',
                       style: TextStyle(color: mutedText, fontSize: 13))),
             ),
+          _textField('requerimientos', 'Requerimientos - otros',
+              lines: 3, hint: 'Insumos, maquinaria, financiamiento…'),
           _textField('necesidades', 'Necesidades principales',
               lines: 3, hint: 'Agua, herramientas, semillas…'),
           _textField('observaciones', 'Observaciones', lines: 3),
         ],
       );
+
+  String _labelsFor(String field) {
+    final values =
+        (_draft[field] as List? ?? const []).map((v) => v.toString());
+    final labels = _multiOptions(field)
+        .where((o) => values.contains(o['value']))
+        .map((o) => o['label'].toString())
+        .join(', ');
+    return labels.isEmpty ? 'Ninguno' : labels;
+  }
 
   Widget _summaryStep() {
     final selectedParroquia = (_catalogos['parroquias'] ?? [])
@@ -899,6 +967,23 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
                     'Voceros': '$speakers',
                     'Rubros':
                         rubroNames.isEmpty ? 'Sin seleccionar' : rubroNames,
+                  },
+                ),
+                _SummaryGroup(
+                  icon: Icons.bug_report_outlined,
+                  title: 'Sanidad y destino',
+                  values: {
+                    'Enfermedades': _labelsFor('enfermedades'),
+                    'Plagas': _labelsFor('plagas'),
+                    'Destino': _labelsFor('destino_produccion'),
+                    'Cultivo': _labelsFor('tipos_cultivo'),
+                    'Animales': _labelsFor('produccion_animal'),
+                    'Requerimientos':
+                        (_draft['requerimientos'] as String? ?? '')
+                                .trim()
+                                .isEmpty
+                            ? 'Sin indicar'
+                            : (_draft['requerimientos'] as String).trim(),
                   },
                 ),
                 _SummaryGroup(

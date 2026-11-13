@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { LayoutDashboard, ListChecks, LogOut, Map, Menu, Sprout, Users, X } from 'lucide-react'
+import { ClipboardPlus, LayoutDashboard, ListChecks, LogOut, Map, Menu, Sprout, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import clsx from 'clsx'
 import { useAuth } from '../lib/auth'
@@ -26,7 +26,7 @@ export function Layout() {
   const loc = useLocation()
   const nav = [
     { to: '/', label: 'Panel general', icon: LayoutDashboard, end: true },
-    { to: '/consejos', label: 'Consejos', icon: ListChecks },
+    { to: '/consejos', label: 'Registros', icon: ListChecks, end: true },
     { to: '/mapa', label: 'Mapa', icon: Map },
     ...(esAdmin ? [{ to: '/usuarios', label: 'Usuarios', icon: Users }] : []),
   ]
@@ -36,6 +36,11 @@ export function Layout() {
     <div className="flex h-full flex-col bg-brand-950 bg-[radial-gradient(ellipse_at_top_left,rgba(16,185,129,0.18),transparent_60%)] px-4 py-6">
       <div className="px-2"><Logo light /></div>
       <nav className="mt-10 flex flex-1 flex-col gap-1">
+        <NavLink to="/consejos/nuevo" onClick={() => setOpen(false)}
+          className="mb-5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-400 to-brand-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-950/40 ring-1 ring-white/20 transition hover:brightness-110">
+          <ClipboardPlus className="size-4.5" />
+          Nuevo registro
+        </NavLink>
         <p className="px-3 pb-2 text-[10px] font-semibold tracking-widest text-brand-300/50 uppercase">Menú</p>
         {nav.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)}
@@ -48,6 +53,13 @@ export function Layout() {
           </NavLink>
         ))}
       </nav>
+      <p className="px-2 pb-3 text-[10px] leading-relaxed text-brand-300/50">
+        © 2026 · Censo de Consejos Campesinos por Fundacite La Guaira ·
+        Gimnasio Vertical de La Guaira, Piso 1
+        <br />
+        Desarrollado por Carmelo Marcano · Programador y desarrollador de
+        software
+      </p>
       <div className="rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
         <div className="flex items-center gap-3">
           <Avatar name={nombre} />

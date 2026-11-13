@@ -194,6 +194,7 @@ class ApiTests(TestCase):
                 "por_rubro",
                 "por_mes",
                 "por_encuestador",
+                "sanidad_produccion",
             },
         )
         self.assertEqual(stats.data["total"], 1)
@@ -228,3 +229,53 @@ class ApiTests(TestCase):
         )
         self.assertEqual(second.status_code, 200, second.data)
         self.assertEqual(Foto.objects.filter(uuid=photo_uuid).count(), 1)
+
+
+class SanidadProduccionTests(TestCase):
+    def setUp(self):
+        for role in ("administrador", "supervisor", "encuestador"):
+            Group.objects.get_or_create(name=role)
+        self.admin = User.objects.create_user("admin_sp", password="clave-segura-1")
+        self.admin.groups.add(Group.objects.get(name="administrador"))
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+        self.parroquia = Parroquia.objects.order_by("id").first()
+
+    def _payload(self, **extra):
+        data = {
+            "nombre": "Consejo Sanidad",
+            "parroquia_id": self.parroquia.id,
+            "lat": 10.58,
+            "lng": -66.9,
+            "enfermedades": ["hongos"],
+            "plagas": ["insectos", "nematodos"],
+            "destino_produccion": ["consumo_familiar", "venta_local_comunal"],
+            "tipos_cultivo": ["asociado"],
+            "produccion_animal": ["avicola", "apicultura"],
+            "requerimientos": "Semillas certificadas",
+        }
+        data.update(extra)
+        return data
+
+    def test_admin_registra_y_estadisticas_cuentan_opciones(self):
+        response = self.client.post("/api/consejos/", self._payload(), format="json")
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(response.data["plagas"], ["insectos", "nematodos"])
+        self.assertEqual(response.data["registrado_por"]["username"], "admin_sp")
+
+        stats = self.client.get("/api/estadisticas/").data["sanidad_produccion"]
+        plagas = {item["value"]: item["total"] for item in stats["plagas"]}
+        self.assertEqual(plagas, {"insectos": 1, "acaros": 0, "nematodos": 1})
+        self.assertEqual(len(stats["produccion_animal"]), 7)
+
+        filtrado = self.client.get("/api/consejos/?animal=apicultura").data
+        self.assertEqual(filtrado["count"], 1)
+        self.assertEqual(self.client.get("/api/consejos/?animal=bovino").data["count"], 0)
+
+        catalogos = self.client.get("/api/catalogos/").data
+        self.assertEqual([o["value"] for o in catalogos["tipos_cultivo"]], ["monocultivo", "rotativo", "asociado"])
+
+    def test_opcion_invalida_es_rechazada(self):
+        response = self.client.post("/api/consejos/", self._payload(plagas=["langosta"]), format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("plagas", response.data)

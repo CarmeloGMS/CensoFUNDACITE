@@ -21,7 +21,15 @@ export interface Catalogos {
   tenencia_tierra: Opcion[]
   fuente_agua: Opcion[]
   estados: Opcion[]
+  enfermedades: Opcion[]
+  plagas: Opcion[]
+  destino_produccion: Opcion[]
+  tipos_cultivo: Opcion[]
+  produccion_animal: Opcion[]
 }
+
+export const CAMPOS_MULTIPLES = ['enfermedades', 'plagas', 'destino_produccion', 'tipos_cultivo', 'produccion_animal'] as const
+export type CampoMultiple = (typeof CAMPOS_MULTIPLES)[number]
 
 export interface Vocero { id?: number; nombre: string; cedula: string; telefono: string; cargo: string; es_principal: boolean }
 export interface Foto { id: number; uuid: string; url: string; descripcion: string }
@@ -49,6 +57,12 @@ export interface Consejo {
   fuente_agua: string
   tiene_riego: boolean
   rubros: Rubro[]
+  enfermedades: string[]
+  plagas: string[]
+  destino_produccion: string[]
+  tipos_cultivo: string[]
+  produccion_animal: string[]
+  requerimientos: string
   necesidades: string
   observaciones: string
   estado: Estado
@@ -75,6 +89,7 @@ export interface Estadisticas {
   por_rubro: { rubro: string; total: number }[]
   por_mes: { mes: string; total: number }[]
   por_encuestador: { usuario: string; total: number }[]
+  sanidad_produccion: Record<CampoMultiple, (Opcion & { total: number })[]>
 }
 
 export interface ConsejoFeature {

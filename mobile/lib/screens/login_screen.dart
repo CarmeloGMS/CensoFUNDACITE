@@ -237,12 +237,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 28),
                   const Center(
-                    child: Text(
-                      'ESTADO LA GUAIRA  ·  MODO CAMPO',
-                      style: TextStyle(
-                          color: Color(0xFF9AA39D),
-                          fontSize: 10,
-                          letterSpacing: 1.25),
+                    child: Column(
+                      children: [
+                        Text(
+                          'ESTADO LA GUAIRA  ·  MODO CAMPO',
+                          style: TextStyle(
+                              color: Color(0xFF9AA39D),
+                              fontSize: 10,
+                              letterSpacing: 1.25),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          '© 2026 · Fundacite La Guaira\nDesarrollado por Carmelo Marcano',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: mutedText, fontSize: 10, height: 1.4),
+                        ),
+                      ],
                     ),
                   ),
                 ],
