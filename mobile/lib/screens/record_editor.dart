@@ -978,6 +978,12 @@ class _RecordEditorState extends ConsumerState<RecordEditor> {
                     'Destino': _labelsFor('destino_produccion'),
                     'Cultivo': _labelsFor('tipos_cultivo'),
                     'Animales': _labelsFor('produccion_animal'),
+                    'Requerimientos':
+                        (_draft['requerimientos'] as String? ?? '')
+                                .trim()
+                                .isEmpty
+                            ? 'Sin indicar'
+                            : (_draft['requerimientos'] as String).trim(),
                   },
                 ),
                 _SummaryGroup(
