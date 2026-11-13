@@ -1,11 +1,28 @@
+import 'package:censo_campesino/core/app_theme.dart';
 import 'package:censo_campesino/core/field_data.dart';
 import 'package:censo_campesino/core/gps_accuracy.dart';
 import 'package:censo_campesino/core/sync_service.dart';
 import 'package:censo_campesino/data/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
+  group('app theme chips', () {
+    test('uses readable colors for selected and unselected states', () {
+      final chipTheme = buildAppTheme().chipTheme;
+
+      expect(chipTheme.backgroundColor, const Color(0xFFF5F5F4));
+      expect(chipTheme.labelStyle?.color, const Color(0xFF1C1917));
+      expect(chipTheme.side?.color, const Color(0xFFD6D3D1));
+      expect(chipTheme.selectedColor, const Color(0xFFD1FAE5));
+      expect(chipTheme.secondarySelectedColor, const Color(0xFFD1FAE5));
+      expect(chipTheme.secondaryLabelStyle?.color, brandGreen);
+      expect(chipTheme.checkmarkColor, brandGreen);
+      expect(chipTheme.showCheckmark, isTrue);
+    });
+  });
+
   group('syncPayloadFromDraft', () {
     test('maps a council draft to the exact write field names', () {
       final payload = syncPayloadFromDraft({

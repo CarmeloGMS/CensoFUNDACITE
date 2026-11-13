@@ -7,6 +7,10 @@ const mintGreen = Color(0xFF10B981);
 const amber = Color(0xFFD97706);
 const stone = Color(0xFFFAFAF9);
 const mutedText = Color(0xFF66716B);
+const chipSurface = Color(0xFFF5F5F4);
+const chipSelectedSurface = Color(0xFFD1FAE5);
+const chipText = Color(0xFF1C1917);
+const chipBorder = Color(0xFFD6D3D1);
 
 ThemeData buildAppTheme() {
   final scheme = ColorScheme.fromSeed(
@@ -90,8 +94,14 @@ ThemeData buildAppTheme() {
     ),
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      side: BorderSide.none,
-      labelStyle: const TextStyle(fontSize: 13),
+      backgroundColor: chipSurface,
+      selectedColor: chipSelectedSurface,
+      secondarySelectedColor: chipSelectedSurface,
+      side: const BorderSide(color: chipBorder),
+      showCheckmark: true,
+      checkmarkColor: brandGreen,
+      labelStyle: const TextStyle(fontSize: 13, color: chipText),
+      secondaryLabelStyle: const TextStyle(fontSize: 13, color: brandGreen),
     ),
   );
 }

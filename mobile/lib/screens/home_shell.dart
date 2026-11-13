@@ -315,7 +315,7 @@ class _DashboardHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'La Guaira · Estado Vargas',
+                      'Estado La Guaira · Municipio Vargas',
                       style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.77),
                           fontSize: 13),
