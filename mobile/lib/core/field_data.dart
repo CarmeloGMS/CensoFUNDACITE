@@ -4,6 +4,49 @@ import 'package:uuid/uuid.dart';
 
 final _uuid = const Uuid();
 
+const multiOptionFields = [
+  'enfermedades',
+  'plagas',
+  'destino_produccion',
+  'tipos_cultivo',
+  'produccion_animal',
+];
+
+List<Map<String, dynamic>> _opts(List<List<String>> pairs) => [
+      for (final p in pairs) {'value': p[0], 'label': p[1]}
+    ];
+
+final defaultMultiOptions = <String, List<Map<String, dynamic>>>{
+  'enfermedades': _opts([
+    ['hongos', 'Hongos'],
+    ['bacterias', 'Bacterias'],
+  ]),
+  'plagas': _opts([
+    ['insectos', 'Insectos'],
+    ['acaros', 'Ácaros'],
+    ['nematodos', 'Nematodos'],
+  ]),
+  'destino_produccion': _opts([
+    ['consumo_familiar', 'Consumo familiar'],
+    ['venta_local_comunal', 'Venta local / comunal'],
+    ['venta_mercados_industrial', 'Venta a mercados / industrial'],
+  ]),
+  'tipos_cultivo': _opts([
+    ['monocultivo', 'Monocultivo'],
+    ['rotativo', 'Rotativo'],
+    ['asociado', 'Asociado'],
+  ]),
+  'produccion_animal': _opts([
+    ['caprino', 'Caprino'],
+    ['porcino', 'Porcino'],
+    ['avicola', 'Avícola'],
+    ['ovino', 'Ovino'],
+    ['acuicultura', 'Acuicultura'],
+    ['bovino', 'Bovino'],
+    ['apicultura', 'Apicultura'],
+  ]),
+};
+
 Map<String, dynamic> newDraft(String deviceId) => {
       'uuid': _uuid.v4(),
       'nombre': '',
@@ -26,6 +69,8 @@ Map<String, dynamic> newDraft(String deviceId) => {
       'fuente_agua': '',
       'tiene_riego': false,
       'rubro_ids': <int>[],
+      for (final field in multiOptionFields) field: <String>[],
+      'requerimientos': '',
       'necesidades': '',
       'observaciones': '',
       'dispositivo_id': deviceId,
@@ -70,6 +115,10 @@ Map<String, dynamic> syncPayloadFromDraft(Map<String, dynamic> draft) {
     'fuente_agua': draft['fuente_agua'] ?? '',
     'tiene_riego': draft['tiene_riego'] == true,
     'rubro_ids': (draft['rubro_ids'] as List? ?? const []).map(_asInt).toList(),
+    for (final field in multiOptionFields)
+      field:
+          (draft[field] as List? ?? const []).map((v) => v.toString()).toList(),
+    'requerimientos': draft['requerimientos'] ?? '',
     'necesidades': draft['necesidades'] ?? '',
     'observaciones': draft['observaciones'] ?? '',
     'dispositivo_id': draft['dispositivo_id'] ?? '',
