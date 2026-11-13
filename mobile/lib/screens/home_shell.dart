@@ -718,9 +718,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 18),
           const Center(
-              child: Text('CENSO CAMPESINO · LA GUAIRA',
+              child: Text(
+                  'CENSO CAMPESINO · FUNDACITE LA GUAIRA\n© 2026 · Desarrollado por Carmelo Marcano',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: mutedText, fontSize: 10, letterSpacing: 1))),
+                      color: mutedText,
+                      fontSize: 10,
+                      letterSpacing: 1,
+                      height: 1.5))),
         ],
       ),
     );

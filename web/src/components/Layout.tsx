@@ -53,6 +53,13 @@ export function Layout() {
           </NavLink>
         ))}
       </nav>
+      <p className="px-2 pb-3 text-[10px] leading-relaxed text-brand-300/50">
+        © 2026 · Censo de Consejos Campesinos por Fundacite La Guaira ·
+        Gimnasio Vertical de La Guaira, Piso 1
+        <br />
+        Desarrollado por Carmelo Marcano · Programador y desarrollador de
+        software
+      </p>
       <div className="rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
         <div className="flex items-center gap-3">
           <Avatar name={nombre} />
