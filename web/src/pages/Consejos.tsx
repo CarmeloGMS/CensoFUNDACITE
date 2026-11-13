@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Download, MapPin, Search, SearchX, Sprout, X } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, ClipboardPlus, Download, MapPin, Search, SearchX, Sprout, X } from 'lucide-react'
 import { PageHeader } from '../components/Layout'
 import { Button, Card, Chip, Empty, EstadoBadge, Input, Select, Spinner } from '../components/ui'
 import { useCatalogos, useConsejos } from '../lib/queries'
@@ -12,6 +12,7 @@ const PAGE_SIZE = 15
 
 export default function Consejos() {
   const [sp, setSp] = useSearchParams()
+  const navigate = useNavigate()
   const { data: cat } = useCatalogos()
   const [q, setQ] = useState(sp.get('search') ?? '')
   const [exporting, setExporting] = useState(false)
@@ -50,7 +51,10 @@ export default function Consejos() {
   return (
     <div className="mx-auto max-w-[1400px] p-4 sm:p-8">
       <PageHeader title="Consejos campesinos" subtitle={`${fmtNum(total)} organizaciones registradas`}
-        actions={<Button variant="secondary" icon={Download} loading={exporting} onClick={exportar}>Exportar CSV</Button>} />
+        actions={<>
+          <Button variant="secondary" icon={Download} loading={exporting} onClick={exportar}>Exportar CSV</Button>
+          <Button icon={ClipboardPlus} onClick={() => navigate('/consejos/nuevo')}>Nuevo registro</Button>
+        </>} />
 
       <Card className="mb-4 p-3">
         <div className="grid gap-3 md:grid-cols-[1fr_200px_200px_180px_auto]">

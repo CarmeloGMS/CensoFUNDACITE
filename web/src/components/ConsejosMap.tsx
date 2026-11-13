@@ -8,11 +8,11 @@ import type { ConsejoFC } from '../lib/types'
 
 setWorkerUrl(workerUrl)
 
-const LA_GUAIRA: [number, number, number, number] = [-67.35, 10.47, -66.05, 10.68]
+export const LA_GUAIRA: [number, number, number, number] = [-67.35, 10.47, -66.05, 10.68]
 
-type Base = 'mapa' | 'satelite'
+export type Base = 'mapa' | 'satelite'
 
-function baseStyle(base: Base): StyleSpecification {
+export function baseStyle(base: Base): StyleSpecification {
   const raster = base === 'mapa'
     ? {
         tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],

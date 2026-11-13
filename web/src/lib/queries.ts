@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { api, qs } from './api'
+import { useAuth } from './auth'
 import type { Catalogos, Consejo, ConsejoFC, Estadisticas, Filtros, Paginated } from './types'
 
 export const useCatalogos = () =>
@@ -16,3 +17,8 @@ export const useConsejos = (f: Filtros & { page?: number; page_size?: number; or
 
 export const useConsejo = (id: string | undefined) =>
   useQuery({ queryKey: ['consejo', id], queryFn: () => api<Consejo>(`/api/consejos/${id}/`), enabled: !!id })
+
+export const usePuedeEditar = () => {
+  const { user, puedeValidar } = useAuth()
+  return (c: Consejo | undefined) => !!c && (puedeValidar || c.registrado_por?.id === user?.id)
+}

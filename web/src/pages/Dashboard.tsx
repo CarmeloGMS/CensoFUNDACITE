@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { ArrowRight, BarChart3, CheckCircle2, Clock, Home, LandPlot, Map as MapIcon, Sprout, TrendingUp, Users, Wheat } from 'lucide-react'
+import { ArrowRight, BarChart3, Bug, Fish, ShoppingBasket, CheckCircle2, Clock, Home, LandPlot, Map as MapIcon, Sprout, TrendingUp, Users, Wheat } from 'lucide-react'
 import { PageHeader } from '../components/Layout'
 import { StatCard } from '../components/StatCard'
 import { Card, CardHeader, EstadoBadge, Select, Spinner } from '../components/ui'
@@ -9,6 +9,44 @@ import { ConsejosMap } from '../components/ConsejosMap'
 import { useAuth } from '../lib/auth'
 import { useCatalogos, useConsejos, useEstadisticas, useGeojson } from '../lib/queries'
 import { ESTADO_META, fmtFecha, fmtMes, fmtNum } from '../lib/format'
+import type { CampoMultiple, Estadisticas } from '../lib/types'
+import type { LucideIcon } from 'lucide-react'
+
+const SANIDAD: { campos: CampoMultiple[]; title: string; subtitle: string; icon: LucideIcon; color: string }[] = [
+  { campos: ['enfermedades', 'plagas'], title: 'Sanidad de la cosecha', subtitle: 'Registros con enfermedades y plagas', icon: Bug, color: '#e11d48' },
+  { campos: ['destino_produccion'], title: 'Destino de la producción', subtitle: 'A dónde va lo cosechado', icon: ShoppingBasket, color: '#0284c7' },
+  { campos: ['tipos_cultivo'], title: 'Tipos de cultivo', subtitle: 'Sistema de siembra', icon: Wheat, color: '#047857' },
+  { campos: ['produccion_animal'], title: 'Producción animal', subtitle: 'Registros por especie', icon: Fish, color: '#d97706' },
+]
+
+const GRUPO: Partial<Record<CampoMultiple, string>> = { enfermedades: 'Enfermedades', plagas: 'Plagas' }
+
+function BarrasOpciones({ st, campos, color }: { st: Estadisticas; campos: CampoMultiple[]; color: string }) {
+  const max = Math.max(1, ...campos.flatMap((c) => st.sanidad_produccion[c].map((o) => o.total)))
+  return (
+    <div className="space-y-4 px-5 pb-5">
+      {campos.map((campo) => (
+        <div key={campo} className="space-y-2.5">
+          {GRUPO[campo] && <p className="text-[11px] font-semibold tracking-wider text-stone-400 uppercase">{GRUPO[campo]}</p>}
+          {st.sanidad_produccion[campo].map((o) => {
+            const pct = st.total ? Math.round((o.total / st.total) * 100) : 0
+            return (
+              <div key={o.value}>
+                <div className="mb-1 flex justify-between gap-2 text-sm">
+                  <span className="text-stone-700">{o.label}</span>
+                  <span className="tabular-nums"><span className="font-semibold text-stone-900">{fmtNum(o.total)}</span><span className="ml-1.5 text-xs text-stone-400">{pct}%</span></span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${(o.total / max) * 100}%`, background: color }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const tooltipStyle = { borderRadius: 12, border: '1px solid #e7e5e4', boxShadow: '0 8px 24px rgba(0,0,0,.08)', fontSize: 12 }
 
@@ -135,6 +173,17 @@ export default function Dashboard() {
               </div>
             </Card>
           </div>
+
+          {st.sanidad_produccion && (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {SANIDAD.map((g) => (
+                <Card key={g.title}>
+                  <CardHeader title={g.title} subtitle={g.subtitle} icon={g.icon} />
+                  <BarrasOpciones st={st} campos={g.campos} color={g.color} />
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="grid gap-6 xl:grid-cols-3">
             <Card className="xl:col-span-2">

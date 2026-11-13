@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Consejos from './pages/Consejos'
 import ConsejoDetalle from './pages/ConsejoDetalle'
+import ConsejoForm from './pages/ConsejoForm'
 import Mapa from './pages/Mapa'
 import Usuarios from './pages/Usuarios'
 
@@ -25,7 +26,9 @@ export default function App() {
       <Route element={<Protegido><Layout /></Protegido>}>
         <Route index element={<Dashboard />} />
         <Route path="consejos" element={<Consejos />} />
+        <Route path="consejos/nuevo" element={<ConsejoForm />} />
         <Route path="consejos/:id" element={<ConsejoDetalle />} />
+        <Route path="consejos/:id/editar" element={<ConsejoForm />} />
         <Route path="mapa" element={<Mapa />} />
         <Route path="usuarios" element={<Protegido admin><Usuarios /></Protegido>} />
       </Route>
