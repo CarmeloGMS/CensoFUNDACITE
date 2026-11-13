@@ -102,3 +102,16 @@ docker compose exec backend python manage.py test
 ## Datos incluidos
 
 Una migración inicializa las 11 parroquias del municipio Vargas, sus centroides aproximados, los 16 rubros y los grupos `administrador`, `supervisor` y `encuestador`. `seed_demo` crea usuarios y 45 consejos ficticios distribuidos por parroquia.
+
+## Aplicación móvil
+
+La app Flutter para encuestadores se encuentra en [`mobile/`](mobile/README.md). Está diseñada para Android y trabajo en campo con conectividad intermitente: conserva los registros localmente y sincroniza por lotes cuando vuelve la conexión.
+
+```bash
+cd mobile
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
+```
+
+En el emulador Android se usa `http://10.0.2.2:8000` para acceder al backend del host. En un teléfono físico, configure en el inicio la URL HTTP de la máquina que ejecuta la API.
