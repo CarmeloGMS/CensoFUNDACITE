@@ -36,6 +36,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Android lint crashes analyzing the image_picker_android plugin; Dart code is checked by `flutter analyze`.
+    lint {
+        checkReleaseBuilds = false
+    }
 }
 
 kotlin {
